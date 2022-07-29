@@ -32,11 +32,7 @@ async function runTravelmAgency(
 export default (options: T.Options): Plugin => ({
   name: "travelm-agency-plugin",
   buildStart: async function (this) {
-    console.log("Running travelm-agency.");
     const filePaths = await getTranslationFilePaths(options.translationDir);
-    filePaths.map((filePath) => {
-      this.addWatchFile(filePath);
-    });
     await runTravelmAgency(options, filePaths, false);
   },
   handleHotUpdate: async function ({ file }) {
