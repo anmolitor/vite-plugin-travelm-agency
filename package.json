@@ -1,0 +1,27 @@
+{
+  "name": "travelm-agency-rollup-plugin",
+  "version": "1.0.0",
+  "description": "rollup plugin to automatically run travelm-agency on build and watch",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Rollup",
+    "Vite",
+    "Elm",
+    "Travelm-Agency",
+    "I18n"
+  ],
+  "author": "Andreas Molitor",
+  "license": "ISC",
+  "dependencies": {
+    "rollup": "^2.77.2",
+    "travelm-agency": "^3.0.2",
+    "vite": "^2.9.14"
+  },
+  "devDependencies": {
+    "@types/node": "^18.6.2",
+    "typescript": "^4.7.4"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "example",
+  "version": "1.0.0",
+  "description": "example for travelm-agency-rollup-plugin usage",
+  "main": "index.js",
+  "scripts": {
+    "start": "vite",
+    "build": "vite build"
+  },
+  "author": "Andreas Molitor",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^18.6.2",
+    "vite": "^2.9.14",
+    "vite-plugin-elm": "^2.6.1"
+  }
+}
