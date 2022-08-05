@@ -3,18 +3,15 @@ module Main exposing (..)
 import Browser
 import Html exposing (Html)
 import Html.Events
-import Http
-import Json.Decode as D
 import Translations exposing (I18n, Language)
 
 
 type Msg
     = SwitchLanguage Language
-    | LoadedTranslations (Result Http.Error (I18n -> I18n))
 
 
 type alias Flags =
-    D.Value
+    ()
 
 
 type alias Model =
@@ -26,15 +23,7 @@ main =
     Browser.document
         { init =
             \translations ->
-                ( { i18n =
-                        Translations.init
-                            |> (case D.decodeValue Translations.decodeMessages translations of
-                                    Ok addTranslations ->
-                                        addTranslations
-
-                                    Err err ->
-                                        identity
-                               )
+                ( { i18n = Translations.init Translations.En
                   , activeLanguage = Translations.En
                   }
                 , Cmd.none
@@ -43,19 +32,13 @@ main =
             \msg model ->
                 case msg of
                     SwitchLanguage lang ->
-                        ( { model | activeLanguage = lang }, Translations.loadMessages { language = lang, path = "/i18n", onLoad = LoadedTranslations } )
-
-                    LoadedTranslations (Ok addTranslations) ->
-                        ( { model | i18n = addTranslations model.i18n }, Cmd.none )
-
-                    LoadedTranslations (Err _) ->
-                        ( model, Cmd.none )
+                        ( { model | activeLanguage = lang, i18n = Translations.load lang model.i18n }, Cmd.none )
         , subscriptions = \_ -> Sub.none
         , view =
             \{ i18n } ->
                 { title = "Vite Plugin"
                 , body =
-                    [ Html.text <| Translations.testMessage i18n
+                    [ Html.span [] [ Html.text <| Translations.testMessage i18n ]
                     ]
                         ++ List.map switchLanguageButton Translations.languages
                 }

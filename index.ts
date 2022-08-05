@@ -91,14 +91,12 @@ export default (options: Partial<Options>): Plugin => {
       await fs.writeFile(elmPath, responseContent.elmFile);
     }
 
-    if (options.generatorMode === "dynamic") {
+    if (generatorMode === "dynamic") {
       responseContent.optimizedJson.forEach((file) => {
         const expectedRequestPath =
           "/" +
-          path
-            .normalize(`${options.jsonPath}/${file.filename}`)
-            .replace(path.sep, "/");
-        if (options.addContentHash) {
+          path.normalize(`${jsonPath}/${file.filename}`).replace(path.sep, "/");
+        if (addContentHash) {
           const [identifier, language, _hash, _ext] = file.filename.split(".");
           const fileNameWithoutHash = [identifier, language].join(".");
           const oldReqPath = fileNameToReqPaths.get(fileNameWithoutHash);
@@ -121,7 +119,7 @@ export default (options: Partial<Options>): Plugin => {
         this: PluginContext,
         file: { filename: string; content: string }
       ) {
-        if (options.generatorMode === "inline") {
+        if (generatorMode === "inline") {
           throw new Error(
             "We somehow tried to emit a file in inline mode. This should not happen."
           );

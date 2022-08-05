@@ -1,4 +1,4 @@
 node_modules
 elm-stuff
-/example/dist
-/example/src/Translations.elm
+Translations.elm
+dist

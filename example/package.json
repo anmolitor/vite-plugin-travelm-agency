@@ -4,9 +4,12 @@
   "description": "example for travelm-agency-rollup-plugin usage",
   "main": "index.js",
   "scripts": {
-    "start": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "start:inline": "cd inline && vite",
+    "build:inline": "cd inline && vite build",
+    "preview:inline": "cd inline && vite preview",
+    "start:dynamic": "cd dynamic && vite",
+    "build:dynamic": "cd dynamic && vite build",
+    "preview:dynamic": "cd dynamic && vite preview"
   },
   "author": "Andreas Molitor",
   "license": "ISC",
