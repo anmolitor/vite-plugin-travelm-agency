@@ -12,6 +12,17 @@ const getTranslationFilePaths = async (dir: string) => {
 export default (options: T.Options): Plugin => {
   const jsonFiles = new Map<string, string>();
   let triggerReload = () => {};
+  let activeLanguage: string | undefined;
+
+  function setActiveLanguage(path: string) {
+    const pathSplitByDot = path.split(".");
+    activeLanguage = pathSplitByDot[pathSplitByDot.length - 2];
+  }
+
+  function isTranslationFileActive(path: string) {
+    const pathSplitByDot = path.split(".");
+    return activeLanguage === pathSplitByDot[pathSplitByDot.length - 2];
+  }
 
   async function runTravelmAgency(
     translationFilePaths: string[],
@@ -66,24 +77,28 @@ export default (options: T.Options): Plugin => {
       }
       const filePaths = await getTranslationFilePaths(options.translationDir);
       await runTravelmAgency(filePaths, false);
-      triggerReload();
+      if (isTranslationFileActive(relativePath)) {
+        triggerReload();
+      }
     },
     load(this, id, options) {
       console.log("LOADING", id, options);
     },
     configureServer(server) {
-      console.log("CONFIGURE SERVER");
       triggerReload = () => server.ws.send({ type: "full-reload", path: "*" });
       server.middlewares.use((req, res, next) => {
-        console.log(req.url, jsonFiles);
-        const i18nFileContent = req.url && jsonFiles.get(req.url);
-        if (i18nFileContent) {
-          console.log("FOUND!");
-          res.write(i18nFileContent);
-          res.end();
+        if (!req.url) {
+          next();
           return;
         }
-        next();
+        const i18nFileContent = jsonFiles.get(req.url);
+        if (!i18nFileContent) {
+          next();
+          return;
+        }
+        setActiveLanguage(req.url);
+        res.write(i18nFileContent);
+        res.end();
       });
     },
   };
