@@ -102,6 +102,10 @@ export default (options: Partial<Options>): Plugin => {
           const oldReqPath = fileNameToReqPaths.get(fileNameWithoutHash);
           oldReqPath && jsonFiles.delete(oldReqPath);
           fileNameToReqPaths.set(fileNameWithoutHash, expectedRequestPath);
+        } else {
+          const [identifier, language, _ext] = file.filename.split(".");
+          const fileNameWithoutHash = [identifier, language].join(".");
+          fileNameToReqPaths.set(fileNameWithoutHash, expectedRequestPath);
         }
         jsonFiles.set(expectedRequestPath, file.content);
         if (emitFile !== undefined) {
