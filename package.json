@@ -18,7 +18,7 @@
   "dependencies": {
     "rollup": "^2.77.2",
     "travelm-agency": "^3.0.2",
-    "vite": "^2.9.14"
+    "vite": "^3.0.4"
   },
   "devDependencies": {
     "@types/node": "^18.6.2",
