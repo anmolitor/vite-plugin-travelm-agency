@@ -1,5 +1,6 @@
 import fs from "fs/promises";
 import path from "path";
+import { PluginContext } from "rollup";
 import * as T from "travelm-agency";
 
 import { Plugin } from "vite";
@@ -9,8 +10,11 @@ const getTranslationFilePaths = async (dir: string) => {
   return files.map((file) => path.resolve(dir, file));
 };
 
+type EmitFile = (file: { filename: string; content: string }) => void;
+
 export default (options: T.Options): Plugin => {
-  const virtualModulePrefix = "virtual:travelm-agency";
+  const virtualModuleId = "virtual:travelm-agency";
+  const resolvedVirtualModuleId = "\0" + virtualModuleId;
 
   const jsonFiles = new Map<string, string>();
   const fileNameToReqPaths = new Map<string, string>();
@@ -30,8 +34,9 @@ export default (options: T.Options): Plugin => {
 
   async function runTravelmAgency(
     translationFilePaths: string[],
-    devMode: boolean
+    emitFile?: EmitFile
   ) {
+    const devMode = emitFile === undefined;
     await T.sendTranslations(translationFilePaths, devMode);
     const responseContent = await T.finishModule({ ...options, devMode });
 
@@ -47,28 +52,24 @@ export default (options: T.Options): Plugin => {
     }
 
     if (options.generatorMode === "dynamic") {
-      responseContent.optimizedJson.forEach(
-        (file) => {
-          const expectedRequestPath =
-            "/" +
-            path
-              .normalize(`${options.jsonPath}/${file.filename}`)
-              .replace(path.sep, "/");
-          if (options.addContentHash) {
-            const [identifier, language, _hash, ext] = file.filename.split(".");
-            const fileNameWithoutHash = [identifier, language, ext].join(".");
-            const oldReqPath = fileNameToReqPaths.get(fileNameWithoutHash);
-            oldReqPath && jsonFiles.delete(oldReqPath);
-            fileNameToReqPaths.set(fileNameWithoutHash, expectedRequestPath);
-          }
-          jsonFiles.set(expectedRequestPath, file.content);
+      responseContent.optimizedJson.forEach((file) => {
+        const expectedRequestPath =
+          "/" +
+          path
+            .normalize(`${options.jsonPath}/${file.filename}`)
+            .replace(path.sep, "/");
+        if (options.addContentHash) {
+          const [identifier, language, _hash, _ext] = file.filename.split(".");
+          const fileNameWithoutHash = [identifier, language].join(".");
+          const oldReqPath = fileNameToReqPaths.get(fileNameWithoutHash);
+          oldReqPath && jsonFiles.delete(oldReqPath);
+          fileNameToReqPaths.set(fileNameWithoutHash, expectedRequestPath);
         }
-        //   this.emitFile({
-        //     fileName: path.join(options.jsonPath, file.filename),
-        //     source: file.content,
-        //     type: "asset",
-        //   })
-      );
+        jsonFiles.set(expectedRequestPath, file.content);
+        if (emitFile !== undefined) {
+          emitFile(file);
+        }
+      });
     }
   }
 
@@ -76,7 +77,23 @@ export default (options: T.Options): Plugin => {
     name: "travelm-agency-plugin",
     buildStart: async function (this) {
       const filePaths = await getTranslationFilePaths(options.translationDir);
-      await runTravelmAgency(filePaths, false);
+      function emitFile(
+        this: PluginContext,
+        file: { filename: string; content: string }
+      ) {
+        if (options.generatorMode === "inline") {
+          throw new Error(
+            "We somehow tried to emit a file in inline mode. This should not happen."
+          );
+        }
+        this.emitFile({
+          type: "asset",
+          fileName: path.join(options.jsonPath, file.filename),
+          source: file.content,
+        });
+      }
+      const emit = this.meta.watchMode ? undefined : emitFile.bind(this);
+      await runTravelmAgency(filePaths, emit);
     },
     handleHotUpdate: async function ({ file }) {
       const relativePath = path.relative(
@@ -87,30 +104,26 @@ export default (options: T.Options): Plugin => {
         return;
       }
       const filePaths = await getTranslationFilePaths(options.translationDir);
-      await runTravelmAgency(filePaths, false);
+      await runTravelmAgency(filePaths);
       if (isTranslationFileActive(relativePath)) {
         triggerReload();
       }
     },
     resolveId(id) {
-      if (!id.startsWith(virtualModulePrefix + "/")) {
+      if (id !== virtualModuleId) {
         return;
       }
-      const path = id.replace(virtualModulePrefix + "/", "");
-      const reqPath = fileNameToReqPaths.get(path);
-      if (reqPath) {
-        return virtualModulePrefix + reqPath;
-      }
+      return resolvedVirtualModuleId;
     },
     load(id) {
-      if (!id.startsWith(virtualModulePrefix)) {
+      if (id !== resolvedVirtualModuleId) {
         return;
       }
-      console.log(id, fileNameToReqPaths, jsonFiles);
-      const reqPath = id.replace(virtualModulePrefix, "");
-      console.log("RAWR");
-      console.log(reqPath, jsonFiles.get(reqPath));
-      return jsonFiles.get(reqPath);
+      return `export default {
+        ${[...fileNameToReqPaths.entries()]
+          .map(([key, value]) => `'${key}': '${value}'`)
+          .join(",")}
+      }`;
     },
     configureServer(server) {
       triggerReload = () => server.ws.send({ type: "full-reload", path: "*" });
@@ -125,6 +138,7 @@ export default (options: T.Options): Plugin => {
           return;
         }
         setActiveLanguage(req.url);
+        res.setHeader("content-type", "application/json");
         res.write(i18nFileContent);
         res.end();
       });
