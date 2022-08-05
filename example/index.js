@@ -1,3 +1,5 @@
 import { Elm } from "./src/Main.elm";
 
-Elm.Main.init();
+fetch("/i18n/messages.en.json")
+  .then((response) => response.json())
+  .then((translations) => Elm.Main.init({ flags: translations }));
