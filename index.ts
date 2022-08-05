@@ -10,7 +10,11 @@ const getTranslationFilePaths = async (dir: string) => {
 };
 
 export default (options: T.Options): Plugin => {
+  const virtualModulePrefix = "virtual:travelm-agency";
+
   const jsonFiles = new Map<string, string>();
+  const fileNameToReqPaths = new Map<string, string>();
+
   let triggerReload = () => {};
   let activeLanguage: string | undefined;
 
@@ -50,6 +54,13 @@ export default (options: T.Options): Plugin => {
             path
               .normalize(`${options.jsonPath}/${file.filename}`)
               .replace(path.sep, "/");
+          if (options.addContentHash) {
+            const [identifier, language, _hash, ext] = file.filename.split(".");
+            const fileNameWithoutHash = [identifier, language, ext].join(".");
+            const oldReqPath = fileNameToReqPaths.get(fileNameWithoutHash);
+            oldReqPath && jsonFiles.delete(oldReqPath);
+            fileNameToReqPaths.set(fileNameWithoutHash, expectedRequestPath);
+          }
           jsonFiles.set(expectedRequestPath, file.content);
         }
         //   this.emitFile({
@@ -81,8 +92,25 @@ export default (options: T.Options): Plugin => {
         triggerReload();
       }
     },
-    load(this, id, options) {
-      console.log("LOADING", id, options);
+    resolveId(id) {
+      if (!id.startsWith(virtualModulePrefix + "/")) {
+        return;
+      }
+      const path = id.replace(virtualModulePrefix + "/", "");
+      const reqPath = fileNameToReqPaths.get(path);
+      if (reqPath) {
+        return virtualModulePrefix + reqPath;
+      }
+    },
+    load(id) {
+      if (!id.startsWith(virtualModulePrefix)) {
+        return;
+      }
+      console.log(id, fileNameToReqPaths, jsonFiles);
+      const reqPath = id.replace(virtualModulePrefix, "");
+      console.log("RAWR");
+      console.log(reqPath, jsonFiles.get(reqPath));
+      return jsonFiles.get(reqPath);
     },
     configureServer(server) {
       triggerReload = () => server.ws.send({ type: "full-reload", path: "*" });

@@ -11,7 +11,7 @@ export default defineConfig({
       generatorMode: "dynamic",
       jsonPath: "i18n",
       i18nArgFirst: false,
-      addContentHash: false,
+      addContentHash: true,
     }),
     elmPlugin({ optimize: process.env.NODE_ENV === "production" }),
   ],
