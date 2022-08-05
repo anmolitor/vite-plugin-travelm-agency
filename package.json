@@ -1,14 +1,14 @@
 {
-  "name": "travelm-agency-rollup-plugin",
+  "name": "vite-plugin-travelm-agency",
   "version": "1.0.0",
   "description": "rollup plugin to automatically run travelm-agency on build and watch",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc"
   },
   "keywords": [
-    "Rollup",
     "Vite",
+    "vite-plugin",
     "Elm",
     "Travelm-Agency",
     "I18n"
