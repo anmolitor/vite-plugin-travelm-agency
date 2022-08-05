@@ -1,6 +1,6 @@
 {
   "name": "vite-plugin-travelm-agency",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "rollup plugin to automatically run travelm-agency on build and watch",
   "main": "index.js",
   "scripts": {
