@@ -12,7 +12,44 @@ const getTranslationFilePaths = async (dir: string) => {
 
 type EmitFile = (file: { filename: string; content: string }) => void;
 
-export default (options: T.Options): Plugin => {
+interface Options {
+  translationDir: string;
+  elmPath: string;
+  generatorMode: "inline" | "dynamic";
+  i18nArgFirst: boolean;
+  addContentHash: boolean;
+  jsonPath: string;
+}
+
+export default (options: Partial<Options>): Plugin => {
+  const translationDir = options.translationDir || "translations";
+  const elmPath = options.elmPath || "src/Translations.elm";
+  const generatorMode = options.generatorMode || "inline";
+  const i18nArgFirst = !!options.i18nArgFirst;
+  const addContentHash =
+    options.addContentHash === undefined ? true : options.addContentHash;
+  const jsonPath = options.jsonPath || "i18n";
+
+  const travelmOptions: T.Options =
+    generatorMode === "inline"
+      ? {
+          translationDir,
+          elmPath,
+          generatorMode,
+          i18nArgFirst,
+          addContentHash,
+          devMode: true,
+        }
+      : {
+          translationDir,
+          elmPath,
+          generatorMode,
+          i18nArgFirst,
+          addContentHash,
+          jsonPath,
+          devMode: true,
+        };
+
   const virtualModuleId = "virtual:travelm-agency";
   const resolvedVirtualModuleId = "\0" + virtualModuleId;
 
@@ -38,17 +75,20 @@ export default (options: T.Options): Plugin => {
   ) {
     const devMode = emitFile === undefined;
     await T.sendTranslations(translationFilePaths, devMode);
-    const responseContent = await T.finishModule({ ...options, devMode });
+    const responseContent = await T.finishModule({
+      ...travelmOptions,
+      devMode,
+    });
 
     const shouldBeWritten = await fs
-      .readFile(options.elmPath, {
+      .readFile(elmPath, {
         encoding: "utf-8",
       })
       .then((data) => data !== responseContent.elmFile)
       .catch(() => true);
 
     if (shouldBeWritten) {
-      await fs.writeFile(options.elmPath, responseContent.elmFile);
+      await fs.writeFile(elmPath, responseContent.elmFile);
     }
 
     if (options.generatorMode === "dynamic") {
@@ -76,7 +116,7 @@ export default (options: T.Options): Plugin => {
   return {
     name: "travelm-agency-plugin",
     buildStart: async function (this) {
-      const filePaths = await getTranslationFilePaths(options.translationDir);
+      const filePaths = await getTranslationFilePaths(translationDir);
       function emitFile(
         this: PluginContext,
         file: { filename: string; content: string }
@@ -88,7 +128,7 @@ export default (options: T.Options): Plugin => {
         }
         this.emitFile({
           type: "asset",
-          fileName: path.join(options.jsonPath, file.filename),
+          fileName: path.join(jsonPath, file.filename),
           source: file.content,
         });
       }
@@ -96,14 +136,11 @@ export default (options: T.Options): Plugin => {
       await runTravelmAgency(filePaths, emit);
     },
     handleHotUpdate: async function ({ file }) {
-      const relativePath = path.relative(
-        path.resolve(options.translationDir),
-        file
-      );
+      const relativePath = path.relative(path.resolve(translationDir), file);
       if (relativePath.startsWith("..")) {
         return;
       }
-      const filePaths = await getTranslationFilePaths(options.translationDir);
+      const filePaths = await getTranslationFilePaths(translationDir);
       await runTravelmAgency(filePaths);
       if (isTranslationFileActive(relativePath)) {
         triggerReload();
