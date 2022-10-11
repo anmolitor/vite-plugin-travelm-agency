@@ -39,6 +39,7 @@ export default (options: Partial<Options>): Plugin => {
           i18nArgFirst,
           addContentHash,
           devMode: true,
+          prefixFileIdentifier: false,
         }
       : {
           translationDir,
@@ -48,6 +49,7 @@ export default (options: Partial<Options>): Plugin => {
           addContentHash,
           jsonPath,
           devMode: true,
+          prefixFileIdentifier: false,
         };
 
   const virtualModuleId = "virtual:travelm-agency";
