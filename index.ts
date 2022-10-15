@@ -119,7 +119,7 @@ export default (options: Partial<Options>): Plugin => {
 
   return {
     name: "travelm-agency-plugin",
-    buildStart: async function (this) {
+    buildStart: async function (this: PluginContext) {
       const filePaths = await getTranslationFilePaths(translationDir);
       function emitFile(
         this: PluginContext,
