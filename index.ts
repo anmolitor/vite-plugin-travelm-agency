@@ -30,7 +30,7 @@ export default (options: Partial<Options>): Plugin => {
   const addContentHash =
     options.addContentHash === undefined ? true : options.addContentHash;
   const jsonPath = options.jsonPath || "i18n";
-  const prefixFileIdentifier = !!options.prefixFileIdentifier
+  const prefixFileIdentifier = !!options.prefixFileIdentifier;
 
   const travelmOptions: T.Options =
     generatorMode === "inline"
