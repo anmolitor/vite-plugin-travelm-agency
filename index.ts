@@ -19,6 +19,7 @@ interface Options {
   i18nArgFirst: boolean;
   addContentHash: boolean;
   jsonPath: string;
+  prefixFileIdentifier: boolean;
 }
 
 export default (options: Partial<Options>): Plugin => {
@@ -29,6 +30,7 @@ export default (options: Partial<Options>): Plugin => {
   const addContentHash =
     options.addContentHash === undefined ? true : options.addContentHash;
   const jsonPath = options.jsonPath || "i18n";
+  const prefixFileIdentifier = !!options.prefixFileIdentifier
 
   const travelmOptions: T.Options =
     generatorMode === "inline"
@@ -39,7 +41,7 @@ export default (options: Partial<Options>): Plugin => {
           i18nArgFirst,
           addContentHash,
           devMode: true,
-          prefixFileIdentifier: false,
+          prefixFileIdentifier,
         }
       : {
           translationDir,
@@ -49,7 +51,7 @@ export default (options: Partial<Options>): Plugin => {
           addContentHash,
           jsonPath,
           devMode: true,
-          prefixFileIdentifier: false,
+          prefixFileIdentifier,
         };
 
   const virtualModuleId = "virtual:travelm-agency";
