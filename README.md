@@ -1,4 +1,4 @@
-# Vite Plugin for Travelm Agency
+# Vite Plugin for Travelm Agency !\[NPM\](https://img.shields.io/npm/v/vite-plugin-travelm-agency)
 
 This is a vite plugin that runs the Travelm-Agency compiler on your translation files
 on build start and also when the translation files change.
@@ -13,6 +13,7 @@ The options and defaults explained:
 - `generatorMode` (inline for strings in .elm file, dynamic for .json file generation) defaults to 'inline'.
 - `addContentHash` (content hashes for generated .json files, only relevant for dynamic generatorMode) defaults to 'true'.
 - `jsonPath` (subfolder where we want our generated .json files to be served from) defaults to 'i18n'.
+- `prefixFileIdentifier` (should all translations be prefixed by the file name they are defined in?) defaults to 'false'.
 
 DevMode is automatically turned on/off depending on if you are running the dev server
 or bundling for production.
