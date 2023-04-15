@@ -1,4 +1,4 @@
-# Vite Plugin for Travelm Agency !\[NPM\](https://img.shields.io/npm/v/vite-plugin-travelm-agency)
+# Vite Plugin for Travelm Agency ![NPM](https://img.shields.io/npm/v/vite-plugin-travelm-agency)
 
 This is a vite plugin that runs the Travelm-Agency compiler on your translation files
 on build start and also when the translation files change.
