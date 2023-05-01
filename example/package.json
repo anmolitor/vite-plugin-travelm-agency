@@ -14,6 +14,6 @@
   "author": "Andreas Molitor",
   "license": "ISC",
   "devDependencies": {
-    "vite-plugin-elm": "^2.7.2"
+    "vite-plugin-elm": "^2.8.0"
   }
 }
