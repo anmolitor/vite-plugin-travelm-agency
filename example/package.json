@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "example for travelm-agency-vite-plugin usage",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "start:inline": "cd inline && vite",
     "build:inline": "cd inline && vite build",
@@ -14,6 +15,6 @@
   "author": "Andreas Molitor",
   "license": "ISC",
   "devDependencies": {
-    "vite-plugin-elm": "^2.7.2"
+    "vite-plugin-elm": "^3.0.0"
   }
 }

@@ -22,7 +22,7 @@ interface Options {
   prefixFileIdentifier: boolean;
 }
 
-export default (options: Partial<Options>): Plugin => {
+export function travelmAgencyPlugin(options: Partial<Options>): Plugin {
   const translationDir = options.translationDir || "translations";
   const elmPath = options.elmPath || "src/Translations.elm";
   const generatorMode = options.generatorMode || "inline";
@@ -187,4 +187,4 @@ export default (options: Partial<Options>): Plugin => {
       });
     },
   };
-};
+}

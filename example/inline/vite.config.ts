@@ -1,6 +1,6 @@
 import { defineConfig } from "vite";
 import elmPlugin from "vite-plugin-elm";
-import travelmAgencyPlugin from "../../index";
+import { travelmAgencyPlugin } from "../../index";
 
 export default defineConfig({
   plugins: [

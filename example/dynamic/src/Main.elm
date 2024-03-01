@@ -1,11 +1,11 @@
 module Main exposing (..)
 
 import Browser
-import Translations exposing (I18n, Language)
 import Html exposing (Html)
 import Html.Events
 import Http
 import Json.Decode as D
+import Translations exposing (I18n, Language)
 
 
 type Msg
@@ -18,7 +18,7 @@ type alias Flags =
 
 
 type alias Model =
-    { i18n : I18n, activeLanguage : Language }
+    { i18n : I18n }
 
 
 main : Program Flags Model Msg
@@ -27,15 +27,14 @@ main =
         { init =
             \translations ->
                 ( { i18n =
-                        Translations.init
-                            |> (case D.decodeValue Translations.decodeMessages translations of
+                        Translations.init { lang = Translations.En, path = "/i18n" }
+                            |> (case D.decodeValue (Translations.decodeMessages Translations.En) translations of
                                     Ok addTranslations ->
                                         addTranslations
 
                                     Err err ->
                                         identity
                                )
-                  , activeLanguage = Translations.En
                   }
                 , Cmd.none
                 )
@@ -43,7 +42,11 @@ main =
             \msg model ->
                 case msg of
                     SwitchLanguage lang ->
-                        ( { model | activeLanguage = lang }, Translations.loadMessages { language = lang, path = "/i18n", onLoad = LoadedTranslations } )
+                        let
+                            ( i18n, cmd ) =
+                                model.i18n |> Translations.switchLanguage lang LoadedTranslations
+                        in
+                        ( { model | i18n = i18n }, cmd )
 
                     LoadedTranslations (Ok addTranslations) ->
                         ( { model | i18n = addTranslations model.i18n }, Cmd.none )
