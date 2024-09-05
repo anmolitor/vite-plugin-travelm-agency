@@ -1,6 +1,6 @@
 {
   "name": "vite-plugin-travelm-agency",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "vite plugin to automatically run travelm-agency on build and watch",
   "main": "lib/index.js",
   "type": "module",
@@ -17,12 +17,12 @@
   "author": "Andreas Molitor",
   "license": "ISC",
   "dependencies": {
-    "rollup": "4.12",
+    "rollup": "^4.21.2",
     "travelm-agency": "^3.4.1",
-    "vite": "^5.1.4"
+    "vite": "^5.4.3"
   },
   "devDependencies": {
-    "@types/node": "^18.11.9",
-    "typescript": "^5.0.4"
+    "@types/node": "^22.5.4",
+    "typescript": "^5.5.4"
   }
 }

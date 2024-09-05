@@ -78,11 +78,15 @@ export function travelmAgencyPlugin(options: Partial<Options>): Plugin {
     emitFile?: EmitFile
   ) {
     const devMode = emitFile === undefined;
+    const makeSureDirExists = fs.mkdir(path.dirname(elmPath), {
+      recursive: true,
+    });
     await T.sendTranslations(translationFilePaths, devMode);
     const responseContent = await T.finishModule({
       ...travelmOptions,
       devMode,
     });
+    await makeSureDirExists;
 
     const shouldBeWritten = await fs
       .readFile(elmPath, {
