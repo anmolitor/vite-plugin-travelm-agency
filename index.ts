@@ -81,8 +81,9 @@ export function travelmAgencyPlugin(options: Partial<Options>): Plugin {
     const makeSureDirExists = fs.mkdir(path.dirname(elmPath), {
       recursive: true,
     });
-    await T.sendTranslations(translationFilePaths, devMode);
-    const responseContent = await T.finishModule({
+    const travelmAgency = T.createInstance();
+    await travelmAgency.sendTranslations(translationFilePaths, devMode);
+    const responseContent = await travelmAgency.finishModule({
       ...travelmOptions,
       devMode,
     });
