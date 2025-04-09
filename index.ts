@@ -237,7 +237,7 @@ export function travelmAgencyPlugin(options: Partial<Options>): Plugin {
         }
 
         if (defaultHtml === "") {
-          const someLanguage = languages.keys().next();
+          const someLanguage = languages.keys().next().value;
           throw new Error(
             `Please set the "defaultLanguage" plugin option to one of your languages, e.g. to '${someLanguage}'`
           );
