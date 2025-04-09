@@ -250,7 +250,7 @@ export function travelmAgencyPlugin(options: Partial<Options>): Plugin {
       htmls.forEach((html, path) => {
         this.emitFile({
           type: "asset",
-          fileName: path.slice(1), // remove leading slash
+          fileName: path,
           source: html,
         });
       });
