@@ -1,6 +1,6 @@
 {
   "name": "vite-plugin-travelm-agency",
-  "version": "2.4.2",
+  "version": "2.5.0",
   "description": "vite plugin to automatically run travelm-agency on build and watch",
   "main": "lib/index.js",
   "type": "module",
