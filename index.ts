@@ -121,9 +121,9 @@ export function travelmAgencyPlugin(options: Partial<Options>): Plugin {
     }
   }
 
-  let languages: Set<String> | undefined;
+  let languages: Set<string> | undefined;
 
-  function getLanguages(): Set<String> {
+  function getLanguages(): Set<string> {
     if (languages) {
       return languages;
     }
@@ -201,8 +201,9 @@ export function travelmAgencyPlugin(options: Partial<Options>): Plugin {
 
         for (const language of languages.keys()) {
           let langFileName = path.join(
+            language,
             baseDir,
-            `${language}/${path.basename(htmlPath)}`
+            path.basename(htmlPath)
           );
           let newHtml = "";
           let lastIndex = 0;
@@ -271,13 +272,13 @@ export function travelmAgencyPlugin(options: Partial<Options>): Plugin {
           return;
         }
 
-        if (req.url.endsWith(".html")) {
-          const pathSplitBySlash = req.url.split("/");
-          const language = pathSplitBySlash[pathSplitBySlash.length - 2];
-          if (getLanguages().has(language)) {
-            req.url = req.url.replace("/" + language + "/", "/");
-            activeLanguage = language;
-          }
+        const pathSplitBySlash = req.url.split("/");
+        const language = pathSplitBySlash[1];
+        if (getLanguages().has(language)) {
+          activeLanguage = language;
+          req.url = req.url.replace("/" + language + "/", "/");
+        } else {
+          activeLanguage = undefined;
         }
 
         next();

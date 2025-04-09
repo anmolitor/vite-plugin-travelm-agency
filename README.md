@@ -53,7 +53,7 @@ To use language-specific builds, some setup is necessary.
 Elm.Main.init({ flags: { translations: window.translations } });
 ```
 
-4. Setup your production file server to handle routing/redirects based on the `accept-language` header. E.g. if your default language is `en`, but I request the `/index.html` with `accept-language: de-DE`, I should get `/de/index.html` instead.
+4. Setup your production file server to handle routing/redirects based on the `accept-language` header. E.g. if your default language is `en`, but I request the `/index.html` with `accept-language: de-DE`, I should get `/de/index.html` instead. The prefix will be top-level, i.e. `/signup/index.html` will generate `/de/signup/index.html`, provided a `TRAVELM_AGENCY_*` placeholder is found.
 
 ## Why is this plugin not Rollup compatible
 
