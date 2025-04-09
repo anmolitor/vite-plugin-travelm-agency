@@ -1,14 +1,18 @@
 <!DOCTYPE html>
 <html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Travelm-Agency Demo</title>
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Travelm-Agency Demo</title>
-</head>
-
-<body>
-  <script src="./index.js" type="module"></script>
-</body>
-
+  <body>
+    <script src="./index.js" type="module"></script>
+    <script>
+      // "messages" refers to the name of the translation file.
+      // This duplicates this index.html into one default "index.html"
+      // and {language}/index.html files per other language.
+      window.translations = __TRAVELM_AGENCY_messages__;
+    </script>
+  </body>
 </html>

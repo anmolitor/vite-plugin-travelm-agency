@@ -14,6 +14,7 @@ type EmitFile = (file: { filename: string; content: string }) => void;
 
 interface Options {
   translationDir: string;
+  defaultLanguage: string;
   elmPath: string;
   generatorMode: "inline" | "dynamic";
   i18nArgFirst: boolean;
@@ -59,14 +60,10 @@ export function travelmAgencyPlugin(options: Partial<Options>): Plugin {
 
   const jsonFiles = new Map<string, string>();
   const fileNameToReqPaths = new Map<string, string>();
+  const htmls = new Map<string, string>();
 
   let triggerReload = () => {};
   let activeLanguage: string | undefined;
-
-  function setActiveLanguage(path: string) {
-    const pathSplitByDot = path.split(".");
-    activeLanguage = pathSplitByDot[pathSplitByDot.length - 2];
-  }
 
   function isTranslationFileActive(path: string) {
     const pathSplitByDot = path.split(".");
@@ -124,6 +121,22 @@ export function travelmAgencyPlugin(options: Partial<Options>): Plugin {
     }
   }
 
+  let languages: Set<String> | undefined;
+
+  function getLanguages(): Set<String> {
+    if (languages) {
+      return languages;
+    }
+    const temp = new Set(
+      Array.from(fileNameToReqPaths.keys())
+        .map((filename) => filename.split("."))
+        .map((segments) => segments[segments.length - 1])
+    );
+    languages = temp;
+
+    return temp;
+  }
+
   return {
     name: "travelm-agency-plugin",
     buildStart: async function (this: PluginContext) {
@@ -173,6 +186,74 @@ export function travelmAgencyPlugin(options: Partial<Options>): Plugin {
           .join(",")}
       }`;
     },
+    transformIndexHtml: {
+      order: "pre",
+      handler(html, { path: htmlPath }) {
+        const regexp = /__TRAVELM_AGENCY_([^_]*(_[^_]+)*)__/g;
+        const matches = Array.from(html.matchAll(regexp));
+        if (matches.length == 0) {
+          return;
+        }
+        const languages = getLanguages();
+
+        const baseDir = path.dirname(htmlPath);
+        let defaultHtml = "";
+
+        for (const language of languages.keys()) {
+          let langFileName = path.join(
+            baseDir,
+            `${language}/${path.basename(htmlPath)}`
+          );
+          let newHtml = "";
+          let lastIndex = 0;
+
+          for (const match of matches) {
+            newHtml += html.slice(lastIndex, match.index);
+            const bundleName = match[1];
+            const reqPath = fileNameToReqPaths.get(`${bundleName}.${language}`);
+            if (!reqPath) {
+              throw new Error(
+                `Unknown bundleName/language '${bundleName}'/'${language}'. Correct syntax is __TRAVELM_AGENCY_bundleName__.`
+              );
+            }
+            const json = jsonFiles.get(reqPath);
+            if (!json) {
+              throw new Error(
+                `Could not find generated json for path ${reqPath}`
+              );
+            }
+            newHtml += json;
+            lastIndex = match.index + match[0].length;
+          }
+
+          newHtml += html.slice(lastIndex);
+
+          if (language === (activeLanguage ?? options.defaultLanguage)) {
+            defaultHtml = newHtml;
+          } else {
+            htmls.set(langFileName, newHtml);
+          }
+        }
+
+        if (defaultHtml === "") {
+          const someLanguage = languages.keys().next();
+          throw new Error(
+            `Please set the "defaultLanguage" plugin option to one of your languages, e.g. to '${someLanguage}'`
+          );
+        }
+
+        return defaultHtml;
+      },
+    },
+    async generateBundle(this: PluginContext) {
+      htmls.forEach((html, path) => {
+        this.emitFile({
+          type: "asset",
+          fileName: path.slice(1), // remove leading slash
+          source: html,
+        });
+      });
+    },
     configureServer(server) {
       triggerReload = () => server.ws.send({ type: "full-reload", path: "*" });
       server.middlewares.use((req, res, next) => {
@@ -181,14 +262,25 @@ export function travelmAgencyPlugin(options: Partial<Options>): Plugin {
           return;
         }
         const i18nFileContent = jsonFiles.get(req.url);
-        if (!i18nFileContent) {
-          next();
+        if (i18nFileContent) {
+          const pathSplitByDot = req.url.split(".");
+          activeLanguage = pathSplitByDot[pathSplitByDot.length - 2];
+          res.setHeader("content-type", "application/json");
+          res.write(i18nFileContent);
+          res.end();
           return;
         }
-        setActiveLanguage(req.url);
-        res.setHeader("content-type", "application/json");
-        res.write(i18nFileContent);
-        res.end();
+
+        if (req.url.endsWith(".html")) {
+          const pathSplitBySlash = req.url.split("/");
+          const language = pathSplitBySlash[pathSplitBySlash.length - 2];
+          if (getLanguages().has(language)) {
+            req.url = req.url.replace("/" + language + "/", "/");
+            activeLanguage = language;
+          }
+        }
+
+        next();
       });
     },
   };
