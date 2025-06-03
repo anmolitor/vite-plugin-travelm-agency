@@ -233,7 +233,6 @@ export function travelmAgencyPlugin(
     transformIndexHtml: {
       order: "post",
       handler(html, { path: htmlPath }) {
-        console.log('handle', html);
         const regexp = /__TRAVELM_AGENCY_([^_]*(_[^_]+)*)__/g;
         const matches = Array.from(html.matchAll(regexp));
         if (matches.length == 0) {
@@ -304,15 +303,18 @@ export function travelmAgencyPlugin(
         return defaultHtml;
       },
     },
-    generateBundle: { order: 'post', async handler(this: PluginContext) {
-      htmls.forEach((html, path) => {
-        this.emitFile({
-          type: "asset",
-          fileName: path,
-          source: html,
+    generateBundle: {
+      order: "post",
+      async handler(this: PluginContext) {
+        htmls.forEach((html, path) => {
+          this.emitFile({
+            type: "asset",
+            fileName: path,
+            source: html,
+          });
         });
-      });
-    }},
+      },
+    },
     configureServer(server) {
       triggerReload = () => server.ws.send({ type: "full-reload", path: "*" });
       server.middlewares.use((req, res, next) => {
