@@ -7,7 +7,7 @@ export default defineConfig({
     travelmAgencyPlugin({
       generatorMode: "dynamic",
       translationDir: "../translations",
-      defaultLanguage: 'en'
+      defaultLanguage: "en",
     }),
     elmPlugin({ optimize: process.env.NODE_ENV === "production" }),
   ],

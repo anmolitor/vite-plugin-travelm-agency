@@ -21,6 +21,8 @@ interface Options {
   addContentHash: boolean;
   jsonPath: string;
   prefixFileIdentifier: boolean;
+  customHtmlModule: string;
+  customHtmlAttributesModule: string;
 }
 
 function addDefaults(options: Partial<Options>): Options {
@@ -32,6 +34,9 @@ function addDefaults(options: Partial<Options>): Options {
     options.addContentHash === undefined ? true : options.addContentHash;
   const jsonPath = options.jsonPath || "i18n";
   const prefixFileIdentifier = !!options.prefixFileIdentifier;
+  const customHtmlModule = options.customHtmlModule ?? "Html";
+  const customHtmlAttributesModule =
+    options.customHtmlAttributesModule ?? `${customHtmlModule}.Attributes`;
 
   return {
     translationDir,
@@ -42,6 +47,8 @@ function addDefaults(options: Partial<Options>): Options {
     jsonPath,
     prefixFileIdentifier,
     defaultLanguage: options.defaultLanguage,
+    customHtmlModule,
+    customHtmlAttributesModule,
   };
 }
 
@@ -53,6 +60,8 @@ function toTravelmAgencyOptions({
   addContentHash,
   prefixFileIdentifier,
   jsonPath,
+  customHtmlModule,
+  customHtmlAttributesModule,
 }: Options): T.Options {
   return generatorMode === "inline"
     ? {
@@ -63,6 +72,8 @@ function toTravelmAgencyOptions({
         addContentHash,
         devMode: true,
         prefixFileIdentifier,
+        customHtmlModule,
+        customHtmlAttributesModule,
       }
     : {
         translationDir,
@@ -73,6 +84,8 @@ function toTravelmAgencyOptions({
         jsonPath,
         devMode: true,
         prefixFileIdentifier,
+        customHtmlModule,
+        customHtmlAttributesModule,
       };
 }
 
