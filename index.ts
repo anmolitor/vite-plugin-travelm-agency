@@ -2,6 +2,7 @@ import fs from "fs/promises";
 import path from "path";
 import { PluginContext } from "rollup";
 import * as T from "travelm-agency";
+import acceptLanguage from "accept-language";
 
 import { Plugin } from "vite";
 
@@ -181,6 +182,10 @@ export function travelmAgencyPlugin(
         .map((segments) => segments[segments.length - 1])
     );
     languages = temp;
+    const defaultLanguage = options[0].defaultLanguage;
+    if (defaultLanguage !== undefined) {
+      acceptLanguage.languages([defaultLanguage, ...temp]);
+    }
 
     return temp;
   }
@@ -347,11 +352,18 @@ export function travelmAgencyPlugin(
 
         const pathSplitBySlash = req.url.split("/");
         const language = pathSplitBySlash[1];
+        console.warn(
+          "req",
+          language,
+          getLanguages(),
+          acceptLanguage.get(req.headers["accept-language"])
+        );
         if (getLanguages().has(language)) {
           activeLanguage = language;
           req.url = req.url.replace("/" + language + "/", "/");
         } else {
-          activeLanguage = undefined;
+          activeLanguage =
+            acceptLanguage.get(req.headers["accept-language"]) ?? undefined;
         }
 
         next();
