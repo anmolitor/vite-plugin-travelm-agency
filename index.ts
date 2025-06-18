@@ -352,12 +352,6 @@ export function travelmAgencyPlugin(
 
         const pathSplitBySlash = req.url.split("/");
         const language = pathSplitBySlash[1];
-        console.warn(
-          "req",
-          language,
-          getLanguages(),
-          acceptLanguage.get(req.headers["accept-language"])
-        );
         if (getLanguages().has(language)) {
           activeLanguage = language;
           req.url = req.url.replace("/" + language + "/", "/");
