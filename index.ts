@@ -105,9 +105,14 @@ export function travelmAgencyPlugin(
   let triggerReload = () => {};
   let activeLanguage: string | undefined;
 
+  function languageFromJsonFilePath(path: string): string {
+    const segments = path.split("/");
+    const lastSegment = segments[segments.length - 1];
+    return lastSegment.split(".")[1];
+  }
+
   function isTranslationFileActive(path: string) {
-    const pathSplitByDot = path.split(".");
-    return activeLanguage === pathSplitByDot[pathSplitByDot.length - 2];
+    return activeLanguage === languageFromJsonFilePath(path);
   }
 
   async function runTravelmAgency(
@@ -342,8 +347,7 @@ export function travelmAgencyPlugin(
         }
         const i18nFileContent = jsonFiles.get(req.url);
         if (i18nFileContent) {
-          const pathSplitByDot = req.url.split(".");
-          activeLanguage = pathSplitByDot[pathSplitByDot.length - 2];
+          activeLanguage = languageFromJsonFilePath(req.url);
           res.setHeader("content-type", "application/json");
           res.write(i18nFileContent);
           res.end();
