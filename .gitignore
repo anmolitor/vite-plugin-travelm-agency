@@ -3,3 +3,4 @@ elm-stuff
 Translations.elm
 dist
 /lib
+.DS_Store
